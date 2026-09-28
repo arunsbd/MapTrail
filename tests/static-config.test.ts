@@ -19,8 +19,8 @@ describe("static hosting configuration", () => {
   });
 
   it("uses the GitHub Pages subdirectory when supplied at build time", async () => {
-    vi.stubEnv("BASE_PATH", "/Geo-Trail");
+    vi.stubEnv("BASE_PATH", "/MapTrail");
     const { default: config } = await import("../next.config");
-    expect(config.basePath).toBe("/Geo-Trail");
+    expect(config.basePath).toBe("/MapTrail");
   });
 });

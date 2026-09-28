@@ -1,8 +1,8 @@
-# GeoTrail — Border Hunt World Rules v1
+# MapTrail — Border Hunt World Rules v1
 
 **Status:** Locked product contract for implementation planning<br>
 **Prepared:** 2026-09-18<br>
-**Product basis:** `GeoTrail_PLAN.md`, the deployed U.S. Border Hunt, and `GeoTrail_Clue_Ladder_Data_Spec.md`<br>
+**Product basis:** `PLAN.md`, the deployed U.S. Border Hunt, and `MapTrail_Clue_Ladder_Data_Spec.md`<br>
 **Scope:** U.S. Border Hunt refinement, continental rollout, World Border Hunt, onboarding, and game discovery
 
 ## 1. Product identity
@@ -43,7 +43,7 @@ Every game mode must explain the player's job before the first round. A new play
 
 **Body:**
 
-> A mystery state has been chosen. Start by guessing any state on the map or searching by name. After each guess, GeoTrail shows how many state borders separate your guess from the mystery state. The hotter the result, the closer you are. 🔥 means your guess directly borders the mystery state, and green means you found it.
+> A mystery state has been chosen. Start by guessing any state on the map or searching by name. After each guess, MapTrail shows how many state borders separate your guess from the mystery state. The hotter the result, the closer you are. 🔥 means your guess directly borders the mystery state, and green means you found it.
 
 **Primary action:** `Start Border Hunt`
 
@@ -53,7 +53,7 @@ Every game mode must explain the player's job before the first round. A new play
 
 **Body:**
 
-> A mystery country has been chosen. Guess a country to begin. GeoTrail follows land borders to show how closely your guess connects to the answer. Some countries cannot be reached by one continuous land trail; if you get stuck, new connection clues unlock as you play.
+> A mystery country has been chosen. Guess a country to begin. MapTrail follows land borders to show how closely your guess connects to the answer. Some countries cannot be reached by one continuous land trail; if you get stuck, new connection clues unlock as you play.
 
 **Primary action:** `Start Border Hunt`
 
@@ -81,7 +81,7 @@ When Clue Ladder expands to countries, replace “state” with “country” fr
 
 ## 4. Game discovery and navigation
 
-GeoTrail is one game platform with multiple modes. Border Hunt and Clue Ladder must not be hidden behind a small icon or an easily missed top-right control.
+MapTrail is one game platform with multiple modes. Border Hunt and Clue Ladder must not be hidden behind a small icon or an easily missed top-right control.
 
 ### 4.1 Required information architecture
 
@@ -175,7 +175,7 @@ The following sequence is locked for Classic mode unless playtesting supports a 
 | After guess 4 | `🌐 LAND TRAIL CLUE` — reveal whether the target can be reached from the player's best relevant guess using only land borders |
 | After guess 5 | `🌊 CROSSING CLUE` — if applicable, reveal that reaching the target requires crossing water |
 | After guess 6 | `🚪 GATEWAY CLUE` — reveal that a gateway relationship exists, but do not name it |
-| After guess 7 | Reveal a broad gateway clue such as the gateway's GeoTrail region or relationship tier |
+| After guess 7 | Reveal a broad gateway clue such as the gateway's MapTrail region or relationship tier |
 | After guess 8 | Reveal the actual gateway country |
 
 Guidelines:
@@ -188,7 +188,7 @@ Guidelines:
 
 ## 10. Gateway definition
 
-A **Gateway Country** is a sovereign country used by GeoTrail as the closest meaningful geographic connection into a target's disconnected land network.
+A **Gateway Country** is a sovereign country used by MapTrail as the closest meaningful geographic connection into a target's disconnected land network.
 
 Gateway never means that two countries share a legal land border.
 
@@ -196,7 +196,7 @@ Player-facing language must say `Gateway Country`, `water crossing`, or another 
 
 ### 10.1 Data and audit requirements
 
-- Candidate gateways originate from minimum boundary-to-boundary distance between the versioned sovereign polygons used by GeoTrail.
+- Candidate gateways originate from minimum boundary-to-boundary distance between the versioned sovereign polygons used by MapTrail.
 - Primary gameplay territory and overseas-territory policy must be applied before calculation.
 - Results must be manually audited for unintuitive polygon artifacts, remote islets, enclaves, disputed geometry, or a technically nearest country that creates poor gameplay.
 - Any override must be explicit, documented, and stored in the versioned geography dataset—not buried in UI code.
@@ -221,7 +221,7 @@ Before broad World implementation, create fixtures and compare candidate algorit
 
 The chosen algorithm must keep heat meaningful for island chains and multiple disconnected land networks without reducing the game to physical distance. The decision and audited fixtures become a separate versioned engineering specification.
 
-## 11. Continents and GeoTrail regions
+## 11. Continents and MapTrail regions
 
 Continents do not control heat or connection scoring.
 
@@ -236,7 +236,7 @@ Asia
 Oceania
 ```
 
-This classification is a GeoTrail gameplay convention. It determines the country pool and map filter for continental modes but does not alter World-mode border relationships.
+This classification is a MapTrail gameplay convention. It determines the country pool and map filter for continental modes but does not alter World-mode border relationships.
 
 Transcontinental and politically sensitive classifications must be explicit in the versioned country table.
 
@@ -305,7 +305,7 @@ The geography dataset must explicitly define:
 - displayed territories;
 - land-border edges;
 - excluded water-only and point-contact relationships;
-- GeoTrail region;
+- MapTrail region;
 - gateway candidates and approved overrides;
 - dataset version.
 
@@ -354,7 +354,7 @@ Do not reveal intermediary route countries during normal play if doing so would 
 Ship world geography as an immutable, named dataset such as:
 
 ```text
-GeoTrail World Geography Dataset v1.0
+MapTrail World Geography Dataset v1.0
 ```
 
 It freezes:
@@ -387,7 +387,7 @@ Updates create new versions. A published daily puzzle must retain the geography 
 - A first-time player is explicitly told that a mystery state has been chosen and how guesses work.
 - Adjacent guesses show `🔥 BORDERING` in the map, result card, and history without using color alone.
 - Correct guesses remain green.
-- Border Hunt and Clue Ladder are visibly presented as game modes in one GeoTrail product.
+- Border Hunt and Clue Ladder are visibly presented as game modes in one MapTrail product.
 - The current responsive design, game logic, daily/practice behavior, scores, statistics, and sharing do not regress.
 
 ### Architecture and World groundwork
@@ -427,4 +427,4 @@ Updates create new versions. A published daily puzzle must retain the geography 
 
 ## 21. Guiding sentence for design and code review
 
-> A new player should immediately know that GeoTrail has chosen a mystery place, know how to make a first guess, understand what the resulting connection feedback means, and see that Border Hunt is one of several GeoTrail games.
+> A new player should immediately know that MapTrail has chosen a mystery place, know how to make a first guess, understand what the resulting connection feedback means, and see that Border Hunt is one of several MapTrail games.

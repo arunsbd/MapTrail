@@ -1,12 +1,12 @@
 # Europe Border Hunt beta
 
-Status: local beta implementation. This document applies the existing `GeoTrail_Border_Hunt_World_Rules_v1.md` contract; it does not amend that contract.
+Status: local beta implementation. This document applies the existing `MapTrail_Border_Hunt_World_Rules_v1.md` contract; it does not amend that contract.
 
 ## Authoritative roster
 
 The playable roster is the intersection of:
 
-1. GeoTrail's 195-country world roster (193 UN member states plus the Holy See and the State of Palestine), and
+1. MapTrail's 195-country world roster (193 UN member states plus the Holy See and the State of Palestine), and
 2. the United Nations Statistics Division M49 Europe region.
 
 That produces 44 playable countries:
@@ -29,7 +29,7 @@ All 44 roster countries are accepted guesses and shown on the map. Mystery targe
 - Roster classification: [UN Statistics Division M49](https://unstats.un.org/unsd/methodology/m49/).
 - Geometry: [Natural Earth Admin 0 Countries](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/), 1:10 million, version 5.1.1, default de facto boundary view.
 - Adjacency basis: exact shared non-zero line segments in the same pinned Natural Earth geometry, followed by the explicit beta policy overrides. Point contact alone never creates a game connection.
-- Licence: [Natural Earth terms of use](https://www.naturalearthdata.com/about/terms-of-use/) place the vector data in the public domain and permit personal, educational, and commercial use. Attribution is not required; GeoTrail voluntarily displays `Made with Natural Earth`.
+- Licence: [Natural Earth terms of use](https://www.naturalearthdata.com/about/terms-of-use/) place the vector data in the public domain and permit personal, educational, and commercial use. Attribution is not required; MapTrail voluntarily displays `Made with Natural Earth`.
 
 The reproducible, checksum-verified generator lives in `scripts/build-europe-geography.mjs`. Exact source metadata and processing steps live in `data/geography/europe/sources.json`. The complete replacement inventory and provenance audit live in [`EUROPE_MAP_PROVENANCE.md`](./EUROPE_MAP_PROVENANCE.md).
 

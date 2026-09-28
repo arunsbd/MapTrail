@@ -10,9 +10,9 @@ export const BrowserBorderHunt = dynamic(
     loading: () => (
       <main className="flex min-h-screen items-center justify-center px-6 text-center">
         <div>
-          <p className="eyebrow">GeoTrail · Border Hunt</p>
+          <p className="eyebrow">MapTrail · Border Hunt</p>
           <p className="mt-3 text-lg font-bold" role="status">Opening your trail…</p>
-          <noscript>Enable JavaScript in your browser to play GeoTrail.</noscript>
+          <noscript>Enable JavaScript in your browser to play MapTrail.</noscript>
         </div>
       </main>
     ),

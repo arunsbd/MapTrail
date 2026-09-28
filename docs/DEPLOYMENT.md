@@ -1,4 +1,4 @@
-# GeoTrail development and deployment
+# MapTrail development and deployment
 
 ## Local development
 
@@ -24,13 +24,13 @@ See [PLAN.md](../PLAN.md) for the product roadmap. The current implementation in
 
 ## Publish with GitHub Pages
 
-The public game address after a successful deployment is [arunsbd.github.io/Geo-Trail](https://arunsbd.github.io/Geo-Trail/).
+The public game address after a successful deployment is [arunsbd.github.io/MapTrail](https://arunsbd.github.io/MapTrail/).
 
 One-time setup in the GitHub repository:
 
 1. Open **Settings → Pages**.
 2. Under **Build and deployment → Source**, select **GitHub Actions**. There is no need to generate another workflow.
-3. Push to `main`, or open **Actions → Deploy GeoTrail to GitHub Pages → Run workflow** and choose `main`.
+3. Push to `main`, or open **Actions → Deploy MapTrail to GitHub Pages → Run workflow** and choose `main`.
 4. Wait for both the build and deployment jobs to succeed, then open the game address.
 
 The workflow installs the pinned pnpm version, runs tests and lint, builds the site, checks its asset paths, and publishes only after those checks pass. Each later push to `main` updates the same link. No personal access token or repository secret is needed for this workflow.
@@ -41,15 +41,17 @@ If the workflow reports that it cannot find the Pages site, check the Source set
 
 `pnpm build` writes the deployable HTML, CSS, and JavaScript into `out/`, which is ignored by Git. GitHub Pages serves these files without a Node.js server. The game starts in the browser so every visit gets a fresh random round, rather than sharing an answer chosen during the build. Players must have JavaScript enabled.
 
-The workflow reads the site's base path from GitHub Pages and supplies it through `BASE_PATH`. For this repository it is `/Geo-Trail`; local development defaults to `/`. If you later configure a custom domain, rebuilding uses the updated Pages path.
+The workflow reads the site's base path and full URL from GitHub Pages and supplies them through `BASE_PATH` and `NEXT_PUBLIC_SITE_URL`. For this repository the base path is `/MapTrail`; local development defaults to `/`. If you later configure a custom domain, rebuilding uses the updated Pages path and canonical URL.
 
 To check the GitHub Pages build locally in PowerShell:
 
 ```powershell
-$env:BASE_PATH = "/Geo-Trail"
+$env:BASE_PATH = "/MapTrail"
+$env:NEXT_PUBLIC_SITE_URL = "https://arunsbd.github.io/MapTrail"
 pnpm build
 pnpm check:export
 Remove-Item Env:BASE_PATH
+Remove-Item Env:NEXT_PUBLIC_SITE_URL
 ```
 
 Use `pnpm dev` for local development. `next start` is not used for a static export; a static web server must serve the contents of `out/` at the same path used when building.

@@ -1,5 +1,5 @@
 export const EUROPE_BETA_POLICY = {
-  roster: "UN M49 Europe intersected with GeoTrail's 195-country world roster",
+  roster: "UN M49 Europe intersected with MapTrail's 195-country world roster",
   targetPool: "The 40-country primary terrestrial component",
   isolatedGuessOnly: ["Iceland", "Malta"],
   separateComponentGuessOnly: ["Ireland", "United Kingdom"],

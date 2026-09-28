@@ -22,7 +22,7 @@ Thumbs.db
 *.swp
 
 # original planning-document filename kept beside canonical PLAN.md
-/GeoTrail_PLAN.md
+/MapTrail_PLAN.md
 
 # logs
 npm-debug.log*

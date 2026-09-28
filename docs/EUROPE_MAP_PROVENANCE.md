@@ -2,7 +2,7 @@
 
 Status: **Natural Earth replacement validated locally and ready for review before commit**
 
-This record inventories the prior source lineage, pins the replacement, and defines how GeoTrail proves that Europe geometry and adjacency no longer depend on the previous restricted source.
+This record inventories the prior source lineage, pins the replacement, and defines how MapTrail proves that Europe geometry and adjacency no longer depend on the previous restricted source.
 
 ## Pinned replacement
 
@@ -20,23 +20,23 @@ This record inventories the prior source lineage, pins the replacement, and defi
 
 ## Licence result
 
-Natural Earth's [terms of use](https://www.naturalearthdata.com/about/terms-of-use/) place all Natural Earth raster and vector data on the site in the public domain. They expressly allow modification, electronic dissemination, and commercial use without permission. Crediting Natural Earth is not required, but GeoTrail voluntarily displays `Made with Natural Earth` and records the source here.
+Natural Earth's [terms of use](https://www.naturalearthdata.com/about/terms-of-use/) place all Natural Earth raster and vector data on the site in the public domain. They expressly allow modification, electronic dissemination, and commercial use without permission. Crediting Natural Earth is not required, but MapTrail voluntarily displays `Made with Natural Earth` and records the source here.
 
-Result: the previous map-data commercial-use blocker is removed for these Natural Earth artifacts. This is a provenance conclusion, not legal advice about unrelated GeoTrail content or third-party dependencies.
+Result: the previous map-data commercial-use blocker is removed for these Natural Earth artifacts. This is a provenance conclusion, not legal advice about unrelated MapTrail content or third-party dependencies.
 
 ## Previous-source inventory and disposition
 
 | Artifact | Previous dependency | Natural Earth disposition |
 | --- | --- | --- |
 | `data/geography/europe/countries.geo.json` | Downloaded country polygons | Fully regenerated from the pinned Natural Earth file |
-| `data/geography/europe/countries.ts` | Hand-maintained source codes and geography anchors | Source IDs, spherical centroids, label anchors, and direction anchors now come from generated Natural Earth metadata; names and aliases remain GeoTrail product data |
+| `data/geography/europe/countries.ts` | Hand-maintained source codes and geography anchors | Source IDs, spherical centroids, label anchors, and direction anchors now come from generated Natural Earth metadata; names and aliases remain MapTrail product data |
 | `data/geography/europe/borders.ts` | Hand-maintained, source-reviewed adjacency | Replaced with typed access to independently generated Natural Earth adjacency |
 | `data/geography/europe/map.ts` | Fixed projection tuned to the previous polygons | Projection now fits Natural Earth-derived Europe display bounds |
 | `data/geography/europe/sources.json` | Previous-source metadata and terms | Replaced with the pinned Natural Earth version, URL, checksum, licence, and processing contract |
 | `scripts/build-europe-geography.mjs` | Per-country source downloader | Replaced with one checksum-gated Natural Earth pipeline |
 | `components/BorderHuntGame.tsx` | Previous-source attribution | Replaced with voluntary Natural Earth provenance text |
 | `tests/europe-geography.test.ts`; existing `tests/direction.test.ts` | Source and reviewed-graph expectations; direction coverage dynamically consumes the country anchors | Provenance checks now validate the Natural Earth checksum, generated centroids, anchors, map bounds, and adjacency; the unchanged direction test was rerun against every regenerated anchor pair |
-| `docs/EUROPE_BORDER_HUNT_BETA.md` | Previous source, terms, and disputed-boundary explanation | Rewritten for Natural Earth and the preserved GeoTrail policy |
+| `docs/EUROPE_BORDER_HUNT_BETA.md` | Previous source, terms, and disputed-boundary explanation | Rewritten for Natural Earth and the preserved MapTrail policy |
 | `docs/GISCO_COMMERCIAL_USE_FOLLOW_UP.md` | Open commercial-use gate | Removed and superseded by this completed migration record |
 | `.next/` and `out/` | Generated caches could retain old geometry or attribution | Purged before final validation, then rebuilt only from the Natural Earth working tree |
 | `.tmp-ne-10m-admin0-v5.1.1.geojson` | Temporary checksum/schema inspection download | Removed after generated outputs were verified |
@@ -44,7 +44,7 @@ Result: the previous map-data commercial-use blocker is removed for these Natura
 ## Reproducible processing
 
 1. Download the pinned Natural Earth GeoJSON and verify its SHA-256.
-2. Select exactly the existing 44-country GeoTrail Europe roster by Natural Earth `ADM0_A3`.
+2. Select exactly the existing 44-country MapTrail Europe roster by Natural Earth `ADM0_A3`.
 3. Copy those source geometries without additional simplification.
 4. Compute each spherical centroid with `d3-geo` `geoCentroid`.
 5. Use Natural Earth `LABEL_X` and `LABEL_Y` for the map label point and Easy Mode direction anchor.
@@ -75,7 +75,7 @@ All 44 source geometry records, centroids, and label/direction anchors were rege
 ## Remaining uncertainties
 
 - Natural Earth is generalized cartographic data, not a cadastral or treaty-boundary authority.
-- Its default file represents a de facto boundary view. GeoTrail's roster and graph policy intentionally remain separate, explicit product decisions.
+- Its default file represents a de facto boundary view. MapTrail's roster and graph policy intentionally remain separate, explicit product decisions.
 - Natural Earth label points are cartographic anchors, not guaranteed geometric interior points. Tiny countries remain playable through accessible controls independent of polygon size.
 - A future Natural Earth release must not silently replace 5.1.1; changing versions requires a new checksum, regenerated outputs, edge diff, visual comparison, and full validation.
 

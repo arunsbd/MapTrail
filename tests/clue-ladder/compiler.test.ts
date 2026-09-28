@@ -81,7 +81,7 @@ describe('deterministic compilation and manifests', () => {
         expect(validateManifest(manifest, dataset)).toEqual([]);
     });
     it('publishes idempotently and cannot overwrite an old manifest', () => {
-        const dir = mkdtempSync(join(tmpdir(), 'geotrail-manifest-'));
+        const dir = mkdtempSync(join(tmpdir(), 'maptrail-manifest-'));
         try {
             const path = join(dir, 'puzzle.json'), first = compileLadder(dataset, 'US-RI', 'first'), second = compileLadder(dataset, 'US-RI', 'second');
             publishManifest(path, first, dataset);

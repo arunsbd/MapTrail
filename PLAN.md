@@ -1,8 +1,8 @@
-# GeoTrail — Product & Build Plan
+# MapTrail — Product & Build Plan
 
 ## 1. Product Vision
 
-**GeoTrail** is a web-based geography game platform built around short, replayable daily challenges.
+**MapTrail** is a web-based geography game platform built around short, replayable daily challenges.
 
 The first release focuses on the **50 U.S. states**, with a later expansion to countries and other regions of the world.
 
@@ -209,7 +209,7 @@ The first public version should intentionally remain small.
 ### Example share result
 
 ```text
-GeoTrail — Border Hunt #24
+MapTrail — Border Hunt #24
 
 🟦 🟨 🟧 🟥 🟩
 Solved in 5 guesses
@@ -473,7 +473,7 @@ Use breadth-first search (BFS) for shortest border distance.
 
 ### Four Corners rule
 
-For GeoTrail, corner contact counts as adjacency. New Mexico–Utah and
+For MapTrail, corner contact counts as adjacency. New Mexico–Utah and
 Arizona–Colorado are each one crossing apart in both directions, even though
 those pairs meet only at a point. Include these edges in the graph so BFS uses
 them for all routes, and show this convention in a visible note beneath the map.
@@ -545,7 +545,7 @@ Vercel and Cloudflare Pages remain future options if hosting requirements change
 ## 13. Suggested Repository Structure
 
 ```text
-geotrail/
+maptrail/
 ├── app/
 │   ├── page.tsx
 │   ├── border-hunt/
@@ -588,7 +588,7 @@ Suggested desktop layout:
 
 ```text
 ------------------------------------------------
-              GEOTRAIL — BORDER HUNT
+              MapTrail — BORDER HUNT
 ------------------------------------------------
 
                [ INTERACTIVE MAP ]
@@ -611,7 +611,7 @@ Score: 850
 Mobile:
 
 ```text
-GEOTRAIL
+MapTrail
 Border Hunt #24
 
 [ MAP ]
@@ -720,7 +720,7 @@ Acceptance criteria:
 Suggested commits:
 
 ```text
-chore: initialize GeoTrail project
+chore: initialize MapTrail project
 feat: add US state dataset
 feat: render interactive US map
 feat: add state guessing
@@ -820,7 +820,7 @@ That is more important than the number of features.
 
 ## 23. Long-Term Vision
 
-GeoTrail can eventually become a small collection of geography games:
+MapTrail can eventually become a small collection of geography games:
 
 - Border Hunt
 - Clue Ladder

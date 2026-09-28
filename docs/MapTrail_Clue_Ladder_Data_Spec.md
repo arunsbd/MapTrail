@@ -1,13 +1,13 @@
-# GeoTrail — Clue Ladder Data Specification
+# MapTrail — Clue Ladder Data Specification
 
 **Status:** Proposed implementation contract<br>
 **Scope:** U.S. state Clue Ladder only; 50 states, excluding the District of Columbia and territories<br>
 **Prepared:** 2026-08-30<br>
-**Product basis:** `GeoTrail_PLAN.md`, especially sections 2B, 7–9, 11, 16, and 17
+**Product basis:** `PLAN.md`, especially sections 2B, 7–9, 11, 16, and 17
 
 ## 1. Executive decision
 
-GeoTrail should use a **fact-first, clue-second** database.
+MapTrail should use a **fact-first, clue-second** database.
 
 A clue must never be the only place where a factual claim exists. Official source snapshots are registered first; normalized facts are then derived from them; human-readable clues point to those facts through machine-readable predicates; and published daily puzzles freeze the exact clue and data versions that players saw.
 
@@ -272,7 +272,7 @@ Rules:
 
 - Every non-derived fact has at least one source locator.
 - Every derived fact has its input fact IDs and reproducible method.
-- A rank is a derived fact. The source provides values; GeoTrail performs the rank within the declared universe.
+- A rank is a derived fact. The source provides values; MapTrail performs the rank within the declared universe.
 - A ratio such as manufacturing share of GDP stores both numerator and denominator input facts.
 - A revised release creates new fact records under a new snapshot; it does not mutate the prior snapshot.
 
@@ -450,7 +450,7 @@ Once published, a manifest is immutable.
 
 ## 5. Difficulty system
 
-Difficulty is not the same thing as factual uniqueness. “Admitted in 1876” identifies only Colorado for someone who knows the date, but the fact itself is obscure. Conversely, “entirely in Eastern Time” is familiar but leaves many candidates. GeoTrail should store both dimensions.
+Difficulty is not the same thing as factual uniqueness. “Admitted in 1876” identifies only Colorado for someone who knows the date, but the fact itself is obscure. Conversely, “entirely in Eastern Time” is familiar but leaves many candidates. MapTrail should store both dimensions.
 
 ### 5.1 Objective selectivity
 
@@ -572,7 +572,7 @@ Wikipedia, tourism pages, commercial rankings, unsourced trivia collections, and
 | Category | Preferred source | Dataset/definition | Refresh policy |
 |---|---|---|---|
 | State population | U.S. Census Bureau | Population Estimates Program, newest completed vintage | Annual |
-| Population rank | Derived by GeoTrail | Sort all 50 state values from one Census vintage | Annual |
+| Population rank | Derived by MapTrail | Sort all 50 state values from one Census vintage | Annual |
 | Major places | U.S. Census Bureau | City and Town Population Estimates; preserve place type | Annual |
 | Land/total area | U.S. Census Bureau | MAF/TIGER area measurements; state whether land or total | On boundary-method revision |
 | Boundaries/silhouette | U.S. Census Bureau | TIGER/Line legal boundaries; cartographic files for display | Annual geometry check |

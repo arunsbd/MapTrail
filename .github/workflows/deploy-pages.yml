@@ -1,4 +1,4 @@
-name: Deploy GeoTrail to GitHub Pages
+name: Deploy MapTrail to GitHub Pages
 
 on:
   push:
@@ -46,11 +46,13 @@ jobs:
         run: pnpm build
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
 
       - name: Verify exported files and asset paths
         run: pnpm check:export
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
 
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4

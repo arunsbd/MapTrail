@@ -25,13 +25,13 @@
   },
   "processing": [
     "Verify the pinned source SHA-256 before parsing",
-    "Select exactly the 44 existing GeoTrail UN M49 Europe roster features by ADM0_A3",
+    "Select exactly the 44 existing MapTrail UN M49 Europe roster features by ADM0_A3",
     "Copy source geometry without simplification",
     "Compute spherical centroids with d3-geo geoCentroid",
     "Use Natural Earth LABEL_X and LABEL_Y as gameplay label and direction anchors",
     "Derive Europe display bounds from source vertices inside the documented Europe display window",
     "Derive adjacency from exact shared non-zero polygon segments",
-    "Apply reviewed GeoTrail policy exclusions after recording every raw candidate",
+    "Apply reviewed MapTrail policy exclusions after recording every raw candidate",
     "Order generated neighbors with the established deterministic BFS tie-break order"
   ],
   "adjacency": {

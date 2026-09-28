@@ -109,7 +109,7 @@ for code,row in reference.items():
     assert all(k in row for k in ['population','land','elevation','admissionYear','gdp','manufacturing','professional','educationHealth','formalParks','zones']),code
 (SNAP/'reference-inputs.json').write_text(json.dumps({'states':reference,'formalParks':park_units,'places':places},indent=2)+'\n',encoding='utf-8')
 # Preserve the audited clue tables and sample orders verbatim as research expectations.
-spec=(ROOT/'docs/GeoTrail_Clue_Ladder_Data_Spec.md').read_text(encoding='utf-8')
+spec=(ROOT/'docs/MapTrail_Clue_Ladder_Data_Spec.md').read_text(encoding='utf-8')
 clues=[]; samples={}
 for code,section in [('AL',11),('CO',12),('RI',13)]:
     text=spec.split(f'## {section}. ',1)[1].split(f'## {section+1}. ',1)[0]

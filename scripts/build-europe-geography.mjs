@@ -187,7 +187,7 @@ const generatedMetadata = {
 const generatedAdjacency = {
   datasetVersion: sources.version,
   sourceSha256: sources.polygons.sha256,
-  method: "Exact shared non-zero polygon segments in Natural Earth Admin 0 Countries 1:10m, followed by explicit GeoTrail policy exclusions",
+  method: "Exact shared non-zero polygon segments in Natural Earth Admin 0 Countries 1:10m, followed by explicit MapTrail policy exclusions",
   candidateEdges: [...candidateEdges].sort(),
   policyRejectedEdges: [...policyRejectedEdges].sort(),
   excludedCandidateEdges,

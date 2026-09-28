@@ -1,7 +1,7 @@
 {
   "datasetVersion": "europe-beta-natural-earth-5.1.1-v1",
   "sourceSha256": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255",
-  "method": "Exact shared non-zero polygon segments in Natural Earth Admin 0 Countries 1:10m, followed by explicit GeoTrail policy exclusions",
+  "method": "Exact shared non-zero polygon segments in Natural Earth Admin 0 Countries 1:10m, followed by explicit MapTrail policy exclusions",
   "candidateEdges": [
     "ALB-GRC",
     "ALB-MKD",

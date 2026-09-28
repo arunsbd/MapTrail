@@ -1,12 +1,12 @@
-# GeoTrail
+# MapTrail
 
 Explore U.S. geography with two guessing games: **Border Hunt** and **Clue Ladder**.
 
-**[Play GeoTrail](https://arunsbd.github.io/Geo-Trail/)**
+**[Play MapTrail](https://arunsbd.github.io/MapTrail/)**
 
 ## Border Hunt
 
-Find the mystery state using feedback from each guess. The number tells you the fewest state-border crossings between your guess and the answer. GeoTrail measures how places connect, not simply how far apart they are.
+Find the mystery state using feedback from each guess. The number tells you the fewest state-border crossings between your guess and the answer. MapTrail measures how places connect, not simply how far apart they are.
 
 The locked heat scale runs from indigo/purple at 8+ borders away through blue, cyan, yellow, amber, orange, and red. A direct neighbor gets the special `🔥 BORDERING` state, and green is reserved for the correct answer. Every color also has a text label.
 
@@ -29,7 +29,7 @@ Identify a mystery state through seven clues, with one guess or skip per clue. A
 
 The current practice collection includes **all 50 U.S. states**, with seven clues per state. Difficulty levels apply only to Border Hunt.
 
-Both playable games include first-play instructions, a persistent **How to play** control, and a labeled game chooser. If a player switches games after making progress, GeoTrail warns before leaving the current round.
+Both playable games include first-play instructions, a persistent **How to play** control, and a labeled game chooser. If a player switches games after making progress, MapTrail warns before leaving the current round.
 
 ## Continental and World roadmap
 

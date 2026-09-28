@@ -113,7 +113,7 @@ export function ClueLadderGame({
       <div className="relative mx-auto max-w-5xl">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--line)] py-5">
           <a className="font-display text-xl font-black tracking-tight" href="#game">
-            GEOTRAIL
+            MapTrail
           </a>
           <GameNavigation activeMode="clue-ladder" hasProgress={hasProgress} />
         </header>

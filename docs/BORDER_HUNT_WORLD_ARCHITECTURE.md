@@ -6,7 +6,7 @@ Status: groundwork only. This document does not approve a production gateway alg
 
 Border Hunt uses one versioned geography dataset contract and one unweighted connection engine. U.S., continental, and World modes select answer pools by `gameRegion`; they do not implement separate scoring engines. The initial TypeScript boundary is in `lib/geography/types.ts`, the generic breadth-first connection engine is in `lib/geography/connection.ts`, and the existing U.S. data adapter is in `data/geography/us-states.ts`.
 
-Every playable place must provide a stable ID, display name, approved aliases, a polygon reference, terrestrial neighbors, and one GeoTrail game region. Every published daily puzzle must retain the dataset version it used. Terrestrial edges must be symmetric and self-edge-free.
+Every playable place must provide a stable ID, display name, approved aliases, a polygon reference, terrestrial neighbors, and one MapTrail game region. Every published daily puzzle must retain the dataset version it used. Terrestrial edges must be symmetric and self-edge-free.
 
 The current U.S. adapter deliberately preserves the existing rules: Census-derived shared boundaries, the two approved Four Corners point contacts, and isolated Alaska/Hawaii nodes. Practice targets remain the connected 48.
 
@@ -50,4 +50,4 @@ For a disconnected target, test that guesses 1–3 reveal no island, ocean, cont
 
 ## Next ingestion step
 
-Start North America by producing a reviewable, immutable candidate dataset—not a playable screen. Define the sovereign-entity table and territory policy first; ingest authoritative polygons; derive and manually audit terrestrial edges; assign exactly one GeoTrail region per playable country; validate aliases and small-place interaction targets; then freeze a named dataset version. Only after those checks pass should the existing generic connection engine receive the new dataset.
+Start North America by producing a reviewable, immutable candidate dataset—not a playable screen. Define the sovereign-entity table and territory policy first; ingest authoritative polygons; derive and manually audit terrestrial edges; assign exactly one MapTrail region per playable country; validate aliases and small-place interaction targets; then freeze a named dataset version. Only after those checks pass should the existing generic connection engine receive the new dataset.

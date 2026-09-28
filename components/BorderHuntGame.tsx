@@ -40,7 +40,7 @@ type GuessResult = {
   feedback: DistanceFeedback;
 };
 
-const EUROPE_ONBOARDING_KEY = "geotrail:onboarding:border-hunt:europe:v1";
+const EUROPE_ONBOARDING_KEY = "maptrail:onboarding:border-hunt:europe:v1";
 const DIRECTION_ARROWS: Record<CardinalDirection, string> = {
   N: "↑", NE: "↗", E: "→", SE: "↘", S: "↓", SW: "↙", W: "←", NW: "↖",
 };
@@ -189,7 +189,7 @@ export function BorderHuntGame() {
         <a className="group flex items-center gap-3 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--trail)]" href="#game">
           <span className="brand-mark" aria-hidden="true"><span /></span>
           <span>
-            <span className="block font-display text-lg font-black tracking-[-0.04em]">GEOTRAIL</span>
+            <span className="block font-display text-lg font-black tracking-[-0.04em]">MapTrail</span>
             <span className="block text-[0.62rem] font-bold tracking-[0.22em] text-[var(--forest)] uppercase">Follow the borders</span>
           </span>
         </a>

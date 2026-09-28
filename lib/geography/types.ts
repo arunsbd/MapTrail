@@ -1,4 +1,4 @@
-export type GeoTrailRegion =
+export type MapTrailRegion =
   | "United States"
   | "North America"
   | "South America"
@@ -25,7 +25,7 @@ export type GeographyPlace<PlaceId extends string> = {
   centroid?: GeographicPoint;
   labelPoint?: GeographicPoint;
   terrestrialNeighbors: readonly PlaceId[];
-  gameRegion: GeoTrailRegion;
+  gameRegion: MapTrailRegion;
 };
 
 export type GeographyDataset<PlaceId extends string> = {
