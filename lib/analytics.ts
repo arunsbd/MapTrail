@@ -111,8 +111,6 @@ export function createAnalyticsClient(capture: Capture) {
   };
 }
 
-let isInitialized = false;
-
 export function hasAnalyticsConfiguration(
   projectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN,
   host = process.env.NEXT_PUBLIC_POSTHOG_HOST,
@@ -121,11 +119,12 @@ export function hasAnalyticsConfiguration(
 }
 
 export function initializeAnalytics() {
-  if (typeof window === "undefined" || isInitialized) return isInitialized;
+  if (typeof window === "undefined") return false;
 
   const projectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST;
   if (!hasAnalyticsConfiguration(projectToken, host)) return false;
+  if (posthog.__loaded) return true;
 
   try {
     posthog.init(projectToken!, {
@@ -133,15 +132,13 @@ export function initializeAnalytics() {
       defaults: "2026-05-30",
       disable_session_recording: true,
     });
-    isInitialized = true;
+    return true;
   } catch {
-    isInitialized = false;
+    return false;
   }
-
-  return isInitialized;
 }
 
 export const analytics = createAnalyticsClient((event, properties) => {
-  if (!isInitialized || typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasAnalyticsConfiguration()) return;
   posthog.capture(event, properties);
 });
