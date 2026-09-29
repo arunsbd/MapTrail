@@ -9,6 +9,10 @@ import {
 import { OnboardingCard } from "@/components/OnboardingCard";
 import { findState, formatStateOption, STATES } from "@/data/states";
 import {
+  analytics,
+  type AnalyticsMapCategory,
+} from "@/lib/analytics";
+import {
   availableScore,
   choosePuzzle,
   hasRevealedMapHint,
@@ -19,6 +23,25 @@ import {
 } from "@/lib/clue-ladder/play";
 import type { ClueLadderHintData } from "@/lib/clue-ladder/hint-types";
 import { hasSeenOnboarding, markOnboardingSeen } from "@/lib/onboarding";
+
+const MAP_HINT_CATEGORIES: Record<MapHintId, AnalyticsMapCategory> = {
+  general: "map_position",
+  "time-zones": "time_zone",
+  parks: "parks",
+};
+
+function elapsedSeconds(startedAt: number | null) {
+  return startedAt === null ? 0 : Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+}
+
+function trackClueRevealed(puzzle: PlayablePuzzle, rung: number) {
+  analytics.clueRevealed({
+    game_mode: "clue_ladder",
+    region: "us",
+    clue_number: rung + 1,
+    clue_category: puzzle.clues[rung].category,
+  });
+}
 
 export function ClueLadderGame({
   puzzles,
@@ -35,6 +58,11 @@ export function ClueLadderGame({
   const [isIntroOpen, setIsIntroOpen] = useState(true);
   const [revealedMapHints, setRevealedMapHints] = useState<MapHintId[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const roundStartedAtRef = useRef<number | null>(null);
+  const restoredRoundTrackedRef = useRef(false);
+  const submittedGuessCodesRef = useRef(new Set<string>());
+  const lastHandledRungRef = useRef<number | null>(null);
+  const roundCompletedRef = useRef(false);
   const puzzle = index === null ? null : puzzles[index];
   const finished = round.status !== "playing";
   const mapPenalty = revealedMapHints.length * MAP_HINT_PENALTY;
@@ -43,23 +71,40 @@ export function ClueLadderGame({
   useEffect(() => {
     if (hasSeenOnboarding("clue-ladder", window.localStorage)) {
       const restoreTimer = window.setTimeout(() => {
+        const nextIndex = choosePuzzle(puzzles.length, null, Math.random());
+        if (!restoredRoundTrackedRef.current) {
+          restoredRoundTrackedRef.current = true;
+          roundStartedAtRef.current = Date.now();
+          analytics.gameStarted({ game_mode: "clue_ladder", region: "us" });
+          trackClueRevealed(puzzles[nextIndex], 0);
+        }
         setHasEnteredGame(true);
         setIsIntroOpen(false);
-        setIndex(choosePuzzle(puzzles.length, null, Math.random()));
+        setIndex(nextIndex);
       }, 0);
       return () => window.clearTimeout(restoreTimer);
     }
   }, [puzzles.length]);
 
   function start() {
+    const nextIndex = choosePuzzle(puzzles.length, index, Math.random());
+    if (finished && puzzle) {
+      analytics.playAgainClicked({ game_mode: "clue_ladder", region: "us" });
+    }
     markOnboardingSeen("clue-ladder", window.localStorage);
     setHasEnteredGame(true);
     setIsIntroOpen(false);
-    setIndex(choosePuzzle(puzzles.length, index, Math.random()));
+    setIndex(nextIndex);
     setRound(newRound());
     setRevealedMapHints([]);
     setInput("");
     setMessage("");
+    submittedGuessCodesRef.current = new Set();
+    lastHandledRungRef.current = null;
+    roundCompletedRef.current = false;
+    roundStartedAtRef.current = Date.now();
+    analytics.gameStarted({ game_mode: "clue_ladder", region: "us" });
+    trackClueRevealed(puzzles[nextIndex], 0);
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }
 
@@ -72,12 +117,37 @@ export function ClueLadderGame({
       setMessage("Enter a U.S. state name or its two-letter abbreviation.");
       return;
     }
-    if (round.guesses.includes(state.code)) {
+    if (
+      submittedGuessCodesRef.current.has(state.code) ||
+      round.guesses.includes(state.code)
+    ) {
       setMessage(`You already tried ${state.name}. Try another state.`);
       return;
     }
+    if (lastHandledRungRef.current === round.rung) return;
+    submittedGuessCodesRef.current.add(state.code);
+    lastHandledRungRef.current = round.rung;
 
     const next = play(puzzle, round, state.code, mapPenalty);
+    analytics.guessSubmitted({
+      game_mode: "clue_ladder",
+      region: "us",
+      guess_number: round.guesses.length + 1,
+      clues_revealed: round.rung + 1,
+      is_correct: next.status === "won",
+    });
+    if (next.rung > round.rung) trackClueRevealed(puzzle, next.rung);
+    if (next.status !== "playing" && !roundCompletedRef.current) {
+      roundCompletedRef.current = true;
+      analytics.gameCompleted({
+        game_mode: "clue_ladder",
+        region: "us",
+        won: next.status === "won",
+        guess_count: next.guesses.length,
+        clues_revealed: next.rung + 1,
+        duration_seconds: elapsedSeconds(roundStartedAtRef.current),
+      });
+    }
     setRound(next);
     setInput("");
     setMessage(
@@ -97,8 +167,35 @@ export function ClueLadderGame({
     if (hint === "parks" && !hasRevealedMapHint(puzzle, round.rung, "parks")) return;
 
     setRevealedMapHints(current => current.includes(hint) ? current : [...current, hint]);
+    analytics.mapClueViewed({
+      game_mode: "clue_ladder",
+      region: "us",
+      map_category: MAP_HINT_CATEGORIES[hint],
+    });
     const label = hint === "general" ? "Labeled states" : hint === "time-zones" ? "Time zones" : "National Parks";
     setMessage(`${label} layer unlocked. ${MAP_HINT_PENALTY} points deducted.`);
+  }
+
+  function revealNextClue() {
+    if (!puzzle || finished || lastHandledRungRef.current === round.rung) return;
+    lastHandledRungRef.current = round.rung;
+    const next = play(puzzle, round);
+    if (next.rung > round.rung) trackClueRevealed(puzzle, next.rung);
+    if (next.status !== "playing" && !roundCompletedRef.current) {
+      roundCompletedRef.current = true;
+      analytics.gameCompleted({
+        game_mode: "clue_ladder",
+        region: "us",
+        won: false,
+        guess_count: next.guesses.length,
+        clues_revealed: next.rung + 1,
+        duration_seconds: elapsedSeconds(roundStartedAtRef.current),
+      });
+    }
+    setRound(next);
+    setInput("");
+    setMessage(round.rung === 6 ? "No guesses left." : "Next clue revealed.");
+    inputRef.current?.focus();
   }
 
   const button =
@@ -115,7 +212,7 @@ export function ClueLadderGame({
           <a className="font-display text-xl font-black tracking-tight" href="#game">
             MapTrail
           </a>
-          <GameNavigation activeMode="clue-ladder" hasProgress={hasProgress} />
+          <GameNavigation activeMode="clue-ladder" hasProgress={hasProgress} region="us" />
         </header>
 
         <section className="py-8 sm:py-12">
@@ -133,7 +230,13 @@ export function ClueLadderGame({
               </p>
               <button
                 className="how-to-play"
-                onClick={() => setIsIntroOpen(true)}
+                onClick={() => {
+                  analytics.instructionsOpened({
+                    game_mode: "clue_ladder",
+                    region: "us",
+                  });
+                  setIsIntroOpen(true);
+                }}
                 type="button"
               >
                 How to play
@@ -227,12 +330,7 @@ export function ClueLadderGame({
                 </datalist>
                 <button
                   className="mt-4 rounded-lg px-1 py-3 font-bold underline underline-offset-4"
-                  onClick={() => {
-                    setRound(play(puzzle, round));
-                    setInput("");
-                    setMessage(round.rung === 6 ? "No guesses left." : "Next clue revealed.");
-                    inputRef.current?.focus();
-                  }}
+                  onClick={revealNextClue}
                   type="button"
                 >
                   {round.rung === 6 ? "Reveal answer" : "Skip to next clue"}

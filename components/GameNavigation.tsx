@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { MouseEvent } from "react";
+import { analytics, type AnalyticsRegion } from "@/lib/analytics";
 import { shouldConfirmGameSwitch } from "@/lib/game-navigation";
 import type { GameMode } from "@/lib/onboarding";
 
@@ -23,14 +24,18 @@ const GAMES = [
 export function GameNavigation({
   activeMode,
   hasProgress,
+  region = "us",
 }: {
   activeMode: GameMode;
   hasProgress: boolean;
+  region?: AnalyticsRegion;
 }) {
   function confirmSwitch(
     event: MouseEvent<HTMLAnchorElement>,
     targetMode: GameMode,
   ) {
+    if (targetMode === activeMode) return;
+
     if (
       shouldConfirmGameSwitch(activeMode, targetMode, hasProgress) &&
       !window.confirm(
@@ -38,7 +43,13 @@ export function GameNavigation({
       )
     ) {
       event.preventDefault();
+      return;
     }
+
+    analytics.gameSelected({
+      game_mode: targetMode === "border-hunt" ? "border_hunt" : "clue_ladder",
+      region: targetMode === "clue-ladder" ? "us" : region,
+    });
   }
 
   return (

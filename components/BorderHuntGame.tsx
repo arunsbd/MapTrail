@@ -12,6 +12,7 @@ import { type PlayableBorderHuntRegion } from "@/data/geography/regions";
 import { US_STATES_DATASET } from "@/data/geography/us-states";
 import { isStateCode, type StateCode } from "@/data/states";
 import { findGeographyPlace, pickMysteryPlace } from "@/lib/border-hunt/engine";
+import { analytics, type AnalyticsRegion } from "@/lib/analytics";
 import { DIFFICULTIES, getDifficultyDescription, type Difficulty } from "@/lib/difficulty";
 import {
   createConnectionGraph,
@@ -51,6 +52,14 @@ function chooseNewMystery(previous: string, targetIds: readonly string[]) {
   return next;
 }
 
+function getAnalyticsRegion(region: PlayableBorderHuntRegion): AnalyticsRegion {
+  return region === "europe" ? "europe" : "us";
+}
+
+function elapsedSeconds(startedAt: number | null) {
+  return startedAt === null ? 0 : Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+}
+
 export function BorderHuntGame() {
   const [region, setRegion] = useState<PlayableBorderHuntRegion>("us-states");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
@@ -62,6 +71,10 @@ export function BorderHuntGame() {
   const [hasEnteredGame, setHasEnteredGame] = useState(false);
   const [isIntroOpen, setIsIntroOpen] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const roundStartedAtRef = useRef<number | null>(null);
+  const restoredRoundTrackedRef = useRef(false);
+  const submittedGuessIdsRef = useRef(new Set<string>());
+  const roundCompletedRef = useRef(false);
 
   const isEurope = region === "europe";
   const dataset = (isEurope ? EUROPE_COUNTRIES_DATASET : US_STATES_DATASET) as GeographyDataset<string>;
@@ -100,6 +113,16 @@ export function BorderHuntGame() {
   useEffect(() => {
     if (hasSeenOnboarding("border-hunt", window.localStorage)) {
       const restoreTimer = window.setTimeout(() => {
+        if (!restoredRoundTrackedRef.current) {
+          restoredRoundTrackedRef.current = true;
+          roundStartedAtRef.current = Date.now();
+          analytics.gameStarted({
+            game_mode: "border_hunt",
+            region: "us",
+            difficulty: "easy",
+            easy_mode: true,
+          });
+        }
         setHasEnteredGame(true);
         setIsIntroOpen(false);
       }, 0);
@@ -113,11 +136,29 @@ export function BorderHuntGame() {
     setGuesses([]);
     setError(null);
     setIsComplete(false);
+    roundStartedAtRef.current = null;
+    submittedGuessIdsRef.current = new Set();
+    roundCompletedRef.current = false;
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }
 
-  function startNewRound() {
+  function startNewRound(nextDifficulty = difficulty) {
     resetRound(chooseNewMystery(mysteryId, targetIds));
+    roundStartedAtRef.current = Date.now();
+    analytics.gameStarted({
+      game_mode: "border_hunt",
+      region: getAnalyticsRegion(region),
+      difficulty: nextDifficulty,
+      easy_mode: nextDifficulty === "easy",
+    });
+  }
+
+  function playAgain() {
+    analytics.playAgainClicked({
+      game_mode: "border_hunt",
+      region: getAnalyticsRegion(region),
+    });
+    startNewRound();
   }
 
   function changeRegion(nextRegion: PlayableBorderHuntRegion) {
@@ -131,13 +172,22 @@ export function BorderHuntGame() {
     const hasSeenIntro = nextRegion === "us-states"
       ? hasSeenOnboarding("border-hunt", window.localStorage)
       : window.localStorage.getItem(EUROPE_ONBOARDING_KEY) === "seen";
+    if (hasSeenIntro) {
+      roundStartedAtRef.current = Date.now();
+      analytics.gameStarted({
+        game_mode: "border_hunt",
+        region: getAnalyticsRegion(nextRegion),
+        difficulty,
+        easy_mode: difficulty === "easy",
+      });
+    }
     setHasEnteredGame(hasSeenIntro);
     setIsIntroOpen(!hasSeenIntro);
   }
 
   function submitGuess(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isComplete) return;
+    if (isComplete || roundCompletedRef.current) return;
     setError(null);
 
     const guessedPlace = findGeographyPlace(dataset, guessInput);
@@ -147,10 +197,14 @@ export function BorderHuntGame() {
         : "That isn't in the Europe beta roster. Try a country name or code.");
       return;
     }
-    if (guesses.some((guess) => guess.code === guessedPlace.id)) {
+    if (
+      submittedGuessIdsRef.current.has(guessedPlace.id) ||
+      guesses.some((guess) => guess.code === guessedPlace.id)
+    ) {
       setError(`You already guessed ${guessedPlace.name}. Try another trail.`);
       return;
     }
+    submittedGuessIdsRef.current.add(guessedPlace.id);
 
     const distance = shortestConnectionDistance(guessedPlace.id, mysteryId, graph);
     const result: GuessResult = {
@@ -159,11 +213,33 @@ export function BorderHuntGame() {
       distance,
       feedback: getDistanceFeedback(distance, placeKind),
     };
+    const guessNumber = guesses.length + 1;
+    const analyticsRegion = getAnalyticsRegion(region);
+    analytics.guessSubmitted({
+      game_mode: "border_hunt",
+      region: analyticsRegion,
+      guess_number: guessNumber,
+      is_correct: distance === 0,
+      border_distance: distance,
+      proximity: result.feedback.level,
+    });
     setGuesses((current) => [...current, result]);
     setGuessInput("");
 
-    if (distance === 0) setIsComplete(true);
-    else inputRef.current?.focus();
+    if (distance === 0) {
+      roundCompletedRef.current = true;
+      setIsComplete(true);
+      analytics.gameCompleted({
+        game_mode: "border_hunt",
+        region: analyticsRegion,
+        won: true,
+        guess_count: guessNumber,
+        duration_seconds: elapsedSeconds(roundStartedAtRef.current),
+        difficulty,
+        easy_mode: difficulty === "easy",
+        target_name: mysteryInfo?.name ?? mysteryId,
+      });
+    } else inputRef.current?.focus();
   }
 
   function selectMapPlace(code: string) {
@@ -178,6 +254,15 @@ export function BorderHuntGame() {
     else markOnboardingSeen("border-hunt", window.localStorage);
     setHasEnteredGame(true);
     setIsIntroOpen(false);
+    if (roundStartedAtRef.current === null) {
+      roundStartedAtRef.current = Date.now();
+      analytics.gameStarted({
+        game_mode: "border_hunt",
+        region: getAnalyticsRegion(region),
+        difficulty,
+        easy_mode: difficulty === "easy",
+      });
+    }
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }
 
@@ -193,7 +278,11 @@ export function BorderHuntGame() {
             <span className="block text-[0.62rem] font-bold tracking-[0.22em] text-[var(--forest)] uppercase">Follow the borders</span>
           </span>
         </a>
-        <GameNavigation activeMode="border-hunt" hasProgress={guesses.length > 0 && !isComplete} />
+        <GameNavigation
+          activeMode="border-hunt"
+          hasProgress={guesses.length > 0 && !isComplete}
+          region={getAnalyticsRegion(region)}
+        />
       </header>
 
       <section className="relative mx-auto max-w-7xl pb-5 pt-7 sm:pb-8 sm:pt-10">
@@ -206,7 +295,19 @@ export function BorderHuntGame() {
             <p className="text-sm leading-6 font-semibold text-[color:var(--ink-soft)] sm:text-base">
               Guess any {placeLabel}. Each result reveals the fewest land borders you’d cross to reach this round’s mystery {placeLabel}.
             </p>
-            <button className="how-to-play" onClick={() => setIsIntroOpen(true)} type="button">How to play</button>
+            <button
+              className="how-to-play"
+              onClick={() => {
+                analytics.instructionsOpened({
+                  game_mode: "border_hunt",
+                  region: getAnalyticsRegion(region),
+                });
+                setIsIntroOpen(true);
+              }}
+              type="button"
+            >
+              How to play
+            </button>
           </div>
         </div>
         <RegionSelector onChange={changeRegion} value={region} />
@@ -234,7 +335,7 @@ export function BorderHuntGame() {
                     aria-describedby="difficulty-description"
                     checked={difficulty === mode}
                     name="difficulty"
-                    onChange={() => { setDifficulty(mode); startNewRound(); }}
+                    onChange={() => { setDifficulty(mode); startNewRound(mode); }}
                     type="radio"
                     value={mode}
                   />
@@ -362,7 +463,7 @@ export function BorderHuntGame() {
                   </div>
                   <p className="mt-2 min-h-5 text-sm font-bold text-[var(--danger)]" id="guess-error" role={error ? "alert" : undefined}>{error}</p>
                 </form>
-                {isComplete ? <button className="secondary-button order-3 mt-4 w-full" onClick={startNewRound} type="button">Start a new trail</button> : null}
+                {isComplete ? <button className="secondary-button order-3 mt-4 w-full" onClick={playAgain} type="button">Start a new trail</button> : null}
               </div>
 
               <div className="border-t border-[var(--line)] px-5 py-5 sm:px-6">
