@@ -21,8 +21,8 @@ describe("analytics", () => {
     posthogMock.capture.mockReset();
     posthogMock.init.mockReset();
     vi.stubGlobal("window", {});
-    vi.stubEnv("NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN", "phc_test");
-    vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "https://us.i.posthog.com");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN", "");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "");
   });
 
   afterEach(() => {
@@ -69,6 +69,9 @@ describe("analytics", () => {
   });
 
   it("initializes the PostHog singleton with automatic analytics intact", () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN", "phc_test");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "https://us.i.posthog.com");
+
     expect(initializeAnalytics()).toBe(true);
     expect(posthogMock.init).toHaveBeenCalledWith("phc_test", {
       api_host: "https://us.i.posthog.com",
@@ -77,7 +80,9 @@ describe("analytics", () => {
     });
   });
 
-  it("captures configured gameplay events through the PostHog singleton", () => {
+  it("captures gameplay events without rechecking runtime configuration", () => {
+    expect(hasAnalyticsConfiguration()).toBe(false);
+
     analytics.gameStarted({
       game_mode: "border_hunt",
       region: "us",
@@ -117,18 +122,6 @@ describe("analytics", () => {
       clue_number: 3,
       clue_category: "time_zone",
     });
-  });
-
-  it("skips custom events safely when analytics configuration is missing", () => {
-    vi.stubEnv("NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN", "");
-
-    expect(() =>
-      analytics.gameStarted({
-        game_mode: "clue_ladder",
-        region: "us",
-      }),
-    ).not.toThrow();
-    expect(posthogMock.capture).not.toHaveBeenCalled();
   });
 
   it("swallows transport errors", () => {

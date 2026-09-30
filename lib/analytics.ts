@@ -139,6 +139,6 @@ export function initializeAnalytics() {
 }
 
 export const analytics = createAnalyticsClient((event, properties) => {
-  if (typeof window === "undefined" || !hasAnalyticsConfiguration()) return;
+  if (typeof window === "undefined") return;
   posthog.capture(event, properties);
 });
