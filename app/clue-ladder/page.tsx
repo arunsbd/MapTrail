@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ClueLadderGame } from "@/components/ClueLadderGame";
 import { loadClueLadderHintData } from "@/lib/clue-ladder/hints";
 import { loadPlayablePuzzles } from "@/lib/clue-ladder/playable";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL, SOCIAL_IMAGE } from "@/lib/site";
 
 const title = "MapTrail — Clue Ladder";
 const description =
@@ -18,8 +18,9 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title,
     description,
+    images: [SOCIAL_IMAGE],
   },
-  twitter: { card: "summary", title, description },
+  twitter: { card: "summary_large_image", title, description, images: [SOCIAL_IMAGE.url] },
 };
 
 export default function ClueLadderPage() {

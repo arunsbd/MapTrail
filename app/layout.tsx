@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, SOCIAL_IMAGE } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,28 +7,24 @@ export const metadata: Metadata = {
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  robots: { index: true, follow: true, "max-image-preview": "large" },
   alternates: {
     canonical: SITE_URL.toString(),
   },
-  manifest: new URL("manifest.webmanifest", SITE_URL).toString(),
+  manifest: `${process.env.BASE_PATH ?? ""}/manifest.webmanifest`,
   openGraph: {
     type: "website",
     url: SITE_URL,
     siteName: SITE_NAME,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{
-      url: "/social-preview.png",
-      width: 1200,
-      height: 630,
-      alt: "MapTrail geography games: Border Hunt and Clue Ladder",
-    }],
+    images: [SOCIAL_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/social-preview.png"],
+    images: [SOCIAL_IMAGE.url],
   },
 };
 
@@ -39,10 +35,32 @@ export const viewport: Viewport = {
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: SITE_NAME,
-  url: SITE_URL.toString(),
-  description: SITE_DESCRIPTION,
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://playmaptrail.com/#website",
+      name: SITE_NAME,
+      url: SITE_URL.toString(),
+      description: SITE_DESCRIPTION,
+      mainEntity: {
+        "@id": "https://playmaptrail.com/#application",
+      },
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://playmaptrail.com/#application",
+      name: SITE_NAME,
+      url: SITE_URL.toString(),
+      description: SITE_DESCRIPTION,
+      applicationCategory: "GameApplication",
+      operatingSystem: "Any",
+      browserRequirements: "Requires JavaScript and a modern web browser",
+      isAccessibleForFree: true,
+      isPartOf: {
+        "@id": "https://playmaptrail.com/#website",
+      },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -55,7 +73,7 @@ export default function RootLayout({
       <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
         />
         {children}
       </body>
