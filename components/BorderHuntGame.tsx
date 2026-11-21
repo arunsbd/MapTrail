@@ -60,6 +60,10 @@ function elapsedSeconds(startedAt: number | null) {
   return startedAt === null ? 0 : Math.max(0, Math.round((Date.now() - startedAt) / 1000));
 }
 
+function roundStartTimestamp() {
+  return Date.now();
+}
+
 export function BorderHuntGame() {
   const [region, setRegion] = useState<PlayableBorderHuntRegion>("us-states");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
@@ -130,6 +134,15 @@ export function BorderHuntGame() {
     }
   }, []);
 
+  function focusGuessOnDesktop() {
+    // Opening the mobile keyboard automatically obscures the map and feedback.
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      inputRef.current?.blur();
+      return;
+    }
+    inputRef.current?.focus();
+  }
+
   function resetRound(nextMystery: string) {
     setMysteryId(nextMystery);
     setGuessInput("");
@@ -139,12 +152,12 @@ export function BorderHuntGame() {
     roundStartedAtRef.current = null;
     submittedGuessIdsRef.current = new Set();
     roundCompletedRef.current = false;
-    window.setTimeout(() => inputRef.current?.focus(), 0);
+    window.setTimeout(focusGuessOnDesktop, 0);
   }
 
   function startNewRound(nextDifficulty = difficulty) {
     resetRound(chooseNewMystery(mysteryId, targetIds));
-    roundStartedAtRef.current = Date.now();
+    roundStartedAtRef.current = roundStartTimestamp();
     analytics.gameStarted({
       game_mode: "border_hunt",
       region: getAnalyticsRegion(region),
@@ -173,7 +186,7 @@ export function BorderHuntGame() {
       ? hasSeenOnboarding("border-hunt", window.localStorage)
       : window.localStorage.getItem(EUROPE_ONBOARDING_KEY) === "seen";
     if (hasSeenIntro) {
-      roundStartedAtRef.current = Date.now();
+      roundStartedAtRef.current = roundStartTimestamp();
       analytics.gameStarted({
         game_mode: "border_hunt",
         region: getAnalyticsRegion(nextRegion),
@@ -239,14 +252,14 @@ export function BorderHuntGame() {
         easy_mode: difficulty === "easy",
         target_name: mysteryInfo?.name ?? mysteryId,
       });
-    } else inputRef.current?.focus();
+    } else focusGuessOnDesktop();
   }
 
   function selectMapPlace(code: string) {
     if (difficulty !== "easy" || isComplete) return;
     setGuessInput(dataset.places.find((place) => place.id === code)?.name ?? code);
     setError(null);
-    inputRef.current?.focus();
+    focusGuessOnDesktop();
   }
 
   function enterGame() {
@@ -255,7 +268,7 @@ export function BorderHuntGame() {
     setHasEnteredGame(true);
     setIsIntroOpen(false);
     if (roundStartedAtRef.current === null) {
-      roundStartedAtRef.current = Date.now();
+      roundStartedAtRef.current = roundStartTimestamp();
       analytics.gameStarted({
         game_mode: "border_hunt",
         region: getAnalyticsRegion(region),
@@ -263,19 +276,19 @@ export function BorderHuntGame() {
         easy_mode: difficulty === "easy",
       });
     }
-    window.setTimeout(() => inputRef.current?.focus(), 0);
+    window.setTimeout(focusGuessOnDesktop, 0);
   }
 
   return (
-    <main className="min-h-screen overflow-hidden px-4 pb-10 sm:px-6 lg:px-8">
+    <main className={`border-hunt-screen min-h-screen overflow-hidden px-4 pb-10 sm:px-6 lg:px-8${isIntroOpen ? " is-intro-open" : ""}`}>
       <div aria-hidden="true" className="topographic-lines" />
 
-      <header className="relative mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 border-b border-[var(--line)] py-4 sm:py-5">
+      <header className="game-header relative mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 border-b border-[var(--line)] py-4 sm:py-5">
         <a className="group flex items-center gap-3 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--trail)]" href="#game">
           <span className="brand-mark" aria-hidden="true"><span /></span>
           <span>
             <span className="block font-display text-lg font-black tracking-[-0.04em]">MapTrail</span>
-            <span className="block text-[0.62rem] font-bold tracking-[0.22em] text-[var(--forest)] uppercase">Follow the borders</span>
+            <span className="brand-tagline block text-[0.62rem] font-bold tracking-[0.22em] text-[var(--forest)] uppercase">Follow the borders</span>
           </span>
         </a>
         <GameNavigation
@@ -285,13 +298,13 @@ export function BorderHuntGame() {
         />
       </header>
 
-      <section className="relative mx-auto max-w-7xl pb-5 pt-7 sm:pb-8 sm:pt-10">
+      <section className={`border-hunt-hero relative mx-auto max-w-7xl pb-5 pt-7 sm:pb-8 sm:pt-10${hasEnteredGame ? " is-playing" : ""}`}>
         <p className="eyebrow">Border Hunt · {isEurope ? "Europe Beta" : "U.S. States"}</p>
         <div className="mt-3 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-          <h1 className="max-w-4xl font-display text-[clamp(2.5rem,7vw,5.6rem)] leading-[0.91] font-black tracking-[-0.07em] text-balance">
+          <h1 className="mobile-hero-title max-w-4xl font-display text-[clamp(2.5rem,7vw,5.6rem)] leading-[0.91] font-black tracking-[-0.07em] text-balance">
             Find the {placeLabel}.<span className="block text-[var(--trail)]">Count the borders.</span>
           </h1>
-          <div className="max-w-md">
+          <div className="hero-support max-w-md">
             <p className="text-sm leading-6 font-semibold text-[color:var(--ink-soft)] sm:text-base">
               Guess any {placeLabel}. Each result reveals the fewest land borders you’d cross to reach this round’s mystery {placeLabel}.
             </p>
@@ -326,7 +339,7 @@ export function BorderHuntGame() {
 
       {hasEnteredGame ? (
         <>
-          <fieldset className="relative mx-auto mb-5 max-w-7xl rounded-xl border border-[var(--line)] bg-white/45 p-4">
+          <fieldset className="difficulty-picker relative mx-auto mb-5 max-w-7xl rounded-xl border border-[var(--line)] bg-white/45 p-4">
             <legend className="px-2 text-xs font-extrabold tracking-widest text-[var(--forest)] uppercase">Difficulty</legend>
             <div className="flex flex-wrap gap-3">
               {(Object.keys(DIFFICULTIES) as Difficulty[]).map((mode) => (
@@ -348,8 +361,38 @@ export function BorderHuntGame() {
             </p>
           </fieldset>
 
-          <section className="relative mx-auto grid max-w-7xl gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.7fr)] lg:gap-5" id="game">
-            <div className="map-card order-1">
+          <section className="game-layout relative mx-auto max-w-7xl" id="game">
+            <form aria-label={isComplete ? "Start a new trail" : `Guess a ${placeLabel}`} className="guess-dock" onSubmit={submitGuess}>
+              {isComplete ? (
+                <button className="primary-button guess-dock__replay" onClick={playAgain} type="button">Play again</button>
+              ) : (
+                <>
+                  <label className="mb-2 block text-xs font-extrabold tracking-[0.12em] text-[var(--forest)] uppercase" htmlFor={isEurope ? "country-guess" : "state-guess"}>Guess a {placeLabel}</label>
+                  <div className="guess-dock__fields">
+                    <input
+                      aria-describedby={error ? "guess-error" : undefined}
+                      aria-invalid={Boolean(error)}
+                      autoComplete="off"
+                      className="guess-input min-w-0 flex-1"
+                      id={isEurope ? "country-guess" : "state-guess"}
+                      list={isEurope ? "country-options" : "state-options"}
+                      onChange={(event) => setGuessInput(event.target.value)}
+                      placeholder={isEurope ? "e.g. France or FRA" : "e.g. Kentucky or KY"}
+                      ref={inputRef}
+                      type="text"
+                      value={guessInput}
+                    />
+                    <datalist id={isEurope ? "country-options" : "state-options"}>
+                      {dataset.places.map((place) => <option key={place.id} value={place.name}>{place.aliases[0]}</option>)}
+                    </datalist>
+                    <button className="primary-button" disabled={guessInput.trim().length === 0} type="submit">Check trail</button>
+                  </div>
+                  <p className="guess-dock__error mt-2 min-h-5 text-sm font-bold text-[var(--danger)]" id="guess-error" role={error ? "alert" : undefined}>{error}</p>
+                </>
+              )}
+            </form>
+
+            <div className="map-card">
               <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-4 py-3 sm:px-6">
                 <div>
                   <p className="text-xs font-extrabold tracking-[0.14em] text-[var(--forest)] uppercase">The trail map</p>
@@ -358,6 +401,16 @@ export function BorderHuntGame() {
                   </p>
                 </div>
                 <span className="map-key"><i aria-hidden="true" /> Guessed</span>
+              </div>
+
+              <div aria-live="polite" className="mobile-map-feedback" role="status">
+                {isComplete ? (
+                  <><strong>🎉 {mysteryInfo?.name}</strong><span>Found in {guesses.length} guesses</span></>
+                ) : latestGuess ? (
+                  <><strong><span aria-hidden="true">{latestGuess.feedback.icon} </span>{latestGuess.name} · {latestGuess.feedback.label}</strong><span>{latestGuess.feedback.detail}</span></>
+                ) : (
+                  <><strong>Start your trail</strong><span>Tap the map or enter a {placeLabel} below.</span></>
+                )}
               </div>
 
               <div className="map-stage px-2 py-4 sm:px-6 sm:py-7">
@@ -403,10 +456,10 @@ export function BorderHuntGame() {
               </p>
             </div>
 
-            <aside aria-label="Border Hunt controls" className="game-card order-2">
+            <aside aria-label="Border Hunt results" className="game-card">
               <div className="game-card__topline"><span>Round status</span><strong>{isComplete ? "Complete" : `${guesses.length} guessed`}</strong></div>
               <div className="flex flex-col px-5 pb-5 pt-6 sm:px-6">
-                <div aria-atomic="true" aria-live="polite" className="order-2 mt-3 min-h-32">
+                <div aria-atomic="true" aria-live="polite" className="min-h-32">
                   {isComplete ? (
                     <div className="success-panel">
                       <p className="feedback-kicker">Destination reached</p>
@@ -439,31 +492,7 @@ export function BorderHuntGame() {
                   )}
                 </div>
 
-                <form className="order-1" onSubmit={submitGuess}>
-                  <label className="mb-2 block text-xs font-extrabold tracking-[0.12em] text-[var(--forest)] uppercase" htmlFor={isEurope ? "country-guess" : "state-guess"}>Guess a {placeLabel}</label>
-                  <div className="flex flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
-                    <input
-                      aria-describedby={error ? "guess-error" : undefined}
-                      aria-invalid={Boolean(error)}
-                      autoComplete="off"
-                      className="guess-input min-w-0 flex-1"
-                      disabled={isComplete}
-                      id={isEurope ? "country-guess" : "state-guess"}
-                      list={isEurope ? "country-options" : "state-options"}
-                      onChange={(event) => setGuessInput(event.target.value)}
-                      placeholder={isEurope ? "e.g. France or FRA" : "e.g. Kentucky or KY"}
-                      ref={inputRef}
-                      type="text"
-                      value={guessInput}
-                    />
-                    <datalist id={isEurope ? "country-options" : "state-options"}>
-                      {dataset.places.map((place) => <option key={place.id} value={place.name}>{place.aliases[0]}</option>)}
-                    </datalist>
-                    <button className="primary-button" disabled={isComplete || guessInput.trim().length === 0} type="submit">Check trail</button>
-                  </div>
-                  <p className="mt-2 min-h-5 text-sm font-bold text-[var(--danger)]" id="guess-error" role={error ? "alert" : undefined}>{error}</p>
-                </form>
-                {isComplete ? <button className="secondary-button order-3 mt-4 w-full" onClick={playAgain} type="button">Start a new trail</button> : null}
+                {isComplete ? <button className="secondary-button mt-4 w-full" onClick={playAgain} type="button">Start a new trail</button> : null}
               </div>
 
               <div className="border-t border-[var(--line)] px-5 py-5 sm:px-6">
