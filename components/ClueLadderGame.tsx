@@ -68,6 +68,23 @@ export function ClueLadderGame({
   const mapPenalty = revealedMapHints.length * MAP_HINT_PENALTY;
   const generalMapRevealed = revealedMapHints.includes("general");
 
+  function focusNextAction(showNextClue = false) {
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      // Keep the keyboard from covering the newest clue after a mobile guess.
+      inputRef.current?.blur();
+      if (showNextClue) {
+        window.setTimeout(() => {
+          document.getElementById("current-clue")?.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+            block: "start",
+          });
+        }, 0);
+      }
+      return;
+    }
+    inputRef.current?.focus();
+  }
+
   useEffect(() => {
     if (hasSeenOnboarding("clue-ladder", window.localStorage)) {
       const restoreTimer = window.setTimeout(() => {
@@ -105,7 +122,7 @@ export function ClueLadderGame({
     roundStartedAtRef.current = Date.now();
     analytics.gameStarted({ game_mode: "clue_ladder", region: "us" });
     trackClueRevealed(puzzles[nextIndex], 0);
-    window.setTimeout(() => inputRef.current?.focus(), 0);
+    window.setTimeout(() => focusNextAction(), 0);
   }
 
   function submit(event: FormEvent) {
@@ -157,7 +174,7 @@ export function ClueLadderGame({
             next.status === "playing" ? " Here is your next clue." : ""
           }`,
     );
-    inputRef.current?.focus();
+    focusNextAction(next.status === "playing" && next.rung > round.rung);
   }
 
   function revealMapHint(hint: MapHintId) {
@@ -195,7 +212,7 @@ export function ClueLadderGame({
     setRound(next);
     setInput("");
     setMessage(round.rung === 6 ? "No guesses left." : "Next clue revealed.");
-    inputRef.current?.focus();
+    focusNextAction(next.status === "playing" && next.rung > round.rung);
   }
 
   const button =
@@ -205,25 +222,25 @@ export function ClueLadderGame({
   );
 
   return (
-    <main className="min-h-screen px-4 pb-12 sm:px-6">
+    <main className="clue-ladder-screen min-h-screen px-4 pb-12 sm:px-6">
       <div aria-hidden="true" className="topographic-lines" />
       <div className="relative mx-auto max-w-5xl">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--line)] py-5">
+        <header className="game-header flex flex-wrap items-center justify-between gap-4 border-b border-[var(--line)] py-5">
           <a className="font-display text-xl font-black tracking-tight" href="#game">
             MapTrail
           </a>
           <GameNavigation activeMode="clue-ladder" hasProgress={hasProgress} region="us" />
         </header>
 
-        <section className="py-8 sm:py-12">
+        <section className={`ladder-hero py-8 sm:py-12${hasEnteredGame ? " is-playing" : ""}`}>
           <p className="eyebrow">Clue Ladder · U.S. States</p>
           <div className="mt-4 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-            <h1 className="font-display text-5xl font-black tracking-tight sm:text-6xl">
+            <h1 className="mobile-hero-title font-display text-5xl font-black tracking-tight sm:text-6xl">
               Seven clues.
               <br />
               <span className="text-[var(--trail-dark)]">One mystery state.</span>
             </h1>
-            <div className="max-w-md">
+            <div className="hero-support max-w-md">
               <p className="leading-7 text-[var(--ink-soft)]">
                 Guess early to score more. A wrong guess or a skip reveals the next
                 clue. You have one guess per clue.
@@ -256,7 +273,7 @@ export function ClueLadderGame({
         ) : null}
 
         {hasEnteredGame && puzzle ? (
-          <div id="game">
+          <div className="ladder-play-area" id="game">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2 font-bold">
               <span>Clue {round.rung + 1} of {puzzle.clues.length}</span>
               <span className="text-right">
@@ -278,7 +295,7 @@ export function ClueLadderGame({
                 />
               ))}
             </div>
-            <section aria-label="Current clue" className="rounded-3xl border border-[var(--line)] bg-white/80 p-6 shadow-sm sm:p-8">
+            <section aria-label="Current clue" className="current-clue rounded-3xl border border-[var(--line)] bg-white/80 p-6 shadow-sm sm:p-8" id="current-clue">
               <p className="text-2xl leading-relaxed font-bold">{puzzle.clues[round.rung].text}</p>
               {puzzle.clues[round.rung].image ? (
                 // Audited inline SVG; no image optimization or network request needed.
@@ -290,6 +307,37 @@ export function ClueLadderGame({
                 />
               ) : null}
             </section>
+            <p aria-live="polite" className="my-4 min-h-6 font-semibold" role="status">{message}</p>
+            {finished ? (
+              <section aria-label="Result" className="rounded-2xl bg-[var(--mist)] p-6">
+                <h2 className="text-2xl font-black">
+                  {round.status === "won" ? "You found " : "The answer was "}{puzzle.name}.
+                </h2>
+                <p className="my-3">
+                  {round.status === "won" ? `Solved on clue ${round.rung + 1}. ` : "All seven clues revealed. "}
+                  Score: {round.score}
+                </p>
+                <button className={button} onClick={start} type="button">Play another state</button>
+              </section>
+            ) : (
+              <form className="clue-answer-form" onSubmit={submit}>
+                <label className="mb-2 block font-bold" htmlFor="ladder-guess">Which state is it?</label>
+                <div className="clue-guess-row flex flex-col gap-3 sm:flex-row">
+                  <input autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-[var(--forest)] bg-white p-3" id="ladder-guess" list="ladder-states" onChange={(event) => setInput(event.target.value)} placeholder="State name or abbreviation" ref={inputRef} value={input} />
+                  <button className={button} type="submit">Guess state</button>
+                </div>
+                <datalist id="ladder-states">
+                  {STATES.map((state) => <option key={state.code} label={formatStateOption(state)} value={state.name} />)}
+                </datalist>
+                <button
+                  className="mt-4 rounded-lg px-1 py-3 font-bold underline underline-offset-4"
+                  onClick={revealNextClue}
+                  type="button"
+                >
+                  {round.rung === 6 ? "Reveal answer" : "Skip to next clue"}
+                </button>
+              </form>
+            )}
             <ClueLadderMapHints
               disabled={finished}
               generalRevealed={generalMapRevealed}
@@ -306,37 +354,6 @@ export function ClueLadderGame({
                 revealed: revealedMapHints.includes("time-zones"),
               }}
             />
-            <p aria-live="polite" className="my-4 min-h-6 font-semibold" role="status">{message}</p>
-            {finished ? (
-              <section aria-label="Result" className="rounded-2xl bg-[var(--mist)] p-6">
-                <h2 className="text-2xl font-black">
-                  {round.status === "won" ? "You found " : "The answer was "}{puzzle.name}.
-                </h2>
-                <p className="my-3">
-                  {round.status === "won" ? `Solved on clue ${round.rung + 1}. ` : "All seven clues revealed. "}
-                  Score: {round.score}
-                </p>
-                <button className={button} onClick={start} type="button">Play another state</button>
-              </section>
-            ) : (
-              <form onSubmit={submit}>
-                <label className="mb-2 block font-bold" htmlFor="ladder-guess">Which state is it?</label>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <input autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-[var(--forest)] bg-white p-3" id="ladder-guess" list="ladder-states" onChange={(event) => setInput(event.target.value)} placeholder="State name or abbreviation" ref={inputRef} value={input} />
-                  <button className={button} type="submit">Guess state</button>
-                </div>
-                <datalist id="ladder-states">
-                  {STATES.map((state) => <option key={state.code} label={formatStateOption(state)} value={state.name} />)}
-                </datalist>
-                <button
-                  className="mt-4 rounded-lg px-1 py-3 font-bold underline underline-offset-4"
-                  onClick={revealNextClue}
-                  type="button"
-                >
-                  {round.rung === 6 ? "Reveal answer" : "Skip to next clue"}
-                </button>
-              </form>
-            )}
             {round.rung > 0 ? (
               <details className="mt-6 rounded-xl border border-[var(--line)] p-4">
                 <summary className="cursor-pointer font-bold">Earlier clues ({round.rung})</summary>

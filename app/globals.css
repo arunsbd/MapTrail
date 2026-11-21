@@ -1217,11 +1217,109 @@ input:disabled {
   font-size: 1.15rem;
 }
 
+/* The active game gets priority over the desktop-style introduction. */
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.7fr);
+  grid-template-areas:
+    "map guess"
+    "map results";
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: 1rem;
+}
+
+.game-layout > .map-card {
+  grid-area: map;
+  min-width: 0;
+}
+
+.game-layout > .game-card {
+  grid-area: results;
+  min-width: 0;
+}
+
+.guess-dock {
+  grid-area: guess;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  padding: 1.2rem;
+  background: #fffdf4;
+  box-shadow: 0 0.65rem 1.5rem rgb(51 75 62 / 8%);
+}
+
+.guess-dock__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.guess-dock__fields .guess-input {
+  flex: 1 1 11rem;
+}
+
+.guess-dock__fields .primary-button {
+  flex: 1 0 auto;
+}
+
+.guess-dock__error:empty {
+  min-height: 0;
+  margin-top: 0;
+}
+
+.mobile-map-feedback {
+  display: none;
+}
+
+.us-map {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.8rem;
+}
+
+.current-clue {
+  scroll-margin-top: 1rem;
+}
+
+.clue-answer-form {
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  padding: 1rem;
+  background: #fffdf4;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "guess" "map" "results";
+    grid-template-rows: auto;
+  }
+}
+
 @media (max-width: 767px) {
+  .game-header {
+    gap: 0.55rem;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .game-header .brand-mark {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .game-header .brand-tagline {
+    display: none;
+  }
+
   .game-navigation {
     width: 100%;
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .game-navigation__label {
+    display: none;
   }
 
   .game-navigation__links {
@@ -1230,15 +1328,291 @@ input:disabled {
     max-width: none;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     overflow: visible;
+    gap: 0.5rem;
+    padding: 0;
   }
 
   .game-navigation__link {
     min-width: 0;
+    min-height: 2.75rem;
+    align-items: center;
+    padding: 0.65rem 0.5rem;
+    border-radius: 0.8rem;
+  }
+
+  .game-navigation__link strong {
+    font-size: 0.88rem;
+  }
+
+  .game-navigation__link span {
+    display: none;
   }
 
   .game-navigation__link--disabled {
-    min-height: 2.5rem;
-    grid-column: 1 / -1;
+    display: none;
+  }
+
+  .border-hunt-screen {
+    padding-bottom: 9rem;
+  }
+
+  .border-hunt-hero,
+  .ladder-hero {
+    padding-top: 1rem;
+    padding-bottom: 0.9rem;
+  }
+
+  .border-hunt-hero .mobile-hero-title,
+  .ladder-hero .mobile-hero-title {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.055em;
+  }
+
+  .border-hunt-hero.is-playing .mobile-hero-title span,
+  .border-hunt-hero.is-playing .hero-support p,
+  .ladder-hero.is-playing .mobile-hero-title,
+  .ladder-hero.is-playing .hero-support p {
+    display: none;
+  }
+
+  .border-hunt-hero.is-playing > div,
+  .ladder-hero.is-playing > div {
+    align-items: center;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+  }
+
+  .border-hunt-hero .how-to-play,
+  .ladder-hero .how-to-play {
+    min-height: 2.75rem;
+    margin-top: 0;
+    padding: 0.5rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+
+  .region-selector {
+    margin-top: 0.5rem;
+  }
+
+  .region-selector__options {
+    gap: 0.4rem;
+  }
+
+  .region-selector__option > span {
+    min-height: 2.75rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .difficulty-picker {
+    margin-bottom: 0.7rem;
+    padding: 0.6rem;
+  }
+
+  .difficulty-picker > div {
+    gap: 0.4rem;
+  }
+
+  .difficulty-picker label {
+    min-height: 2.75rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .difficulty-picker p {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "map" "results";
+    grid-template-rows: auto;
+    gap: 0.75rem;
+  }
+
+  .guess-dock {
+    position: fixed;
+    z-index: 40;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 1rem 1rem 0 0;
+    padding: 0.6rem 0.8rem max(0.7rem, env(safe-area-inset-bottom));
+    background: rgb(255 253 244 / 97%);
+    box-shadow: 0 -0.6rem 1.8rem rgb(35 62 49 / 15%);
+    backdrop-filter: blur(10px);
+  }
+
+  .border-hunt-screen.is-intro-open .guess-dock {
+    display: none;
+  }
+
+  .guess-dock__replay {
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  .guess-dock > label {
+    margin-bottom: 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  .guess-dock__fields {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+
+  .guess-dock__fields .guess-input {
+    width: 100%;
+    min-width: 0;
+    min-height: 3rem;
+    flex: 1 1 auto;
+    padding: 0 0.65rem;
+    font-size: 1rem;
+  }
+
+  .guess-dock__fields .primary-button {
+    min-height: 3rem;
+    flex: 0 0 auto;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.72rem;
+  }
+
+  .guess-dock__error {
+    min-height: 0;
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+  }
+
+  .map-card,
+  .game-card {
+    border-radius: 0.95rem;
+  }
+
+  .mobile-map-feedback {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--forest);
+    background: #eaf1e6;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .mobile-map-feedback strong {
+    font-size: 0.9rem;
+  }
+
+  .mobile-map-feedback span {
+    color: var(--ink-soft);
+  }
+
+  .game-layout .map-stage {
+    padding: 0.5rem 0.3rem;
+  }
+
+  .europe-map,
+  .us-map {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .europe-map__svg,
+  .us-map__svg {
+    order: 1;
+  }
+
+  .europe-map .map-controls,
+  .us-map .map-controls {
+    position: static;
+    display: grid;
+    order: 2;
+    max-width: none;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.3rem;
+    margin: 0.3rem;
+  }
+
+  .europe-map .map-controls button,
+  .us-map .map-controls button {
+    min-width: 0;
+    min-height: 2.75rem;
+    font-size: 0.9rem;
+  }
+
+  .europe-map .microstate-shortcuts {
+    order: 3;
+  }
+
+  .game-layout .heat-legend {
+    gap: 0.7rem;
+    padding: 0.65rem;
+  }
+
+  .game-layout .game-card__topline {
+    min-height: 2.7rem;
+    padding: 0.55rem 1rem;
+  }
+
+  .game-layout .game-card > div:nth-child(2) {
+    padding: 0.8rem 1rem;
+  }
+
+  .guess-list {
+    max-height: 12rem;
+  }
+
+  .ladder-play-area {
+    margin-top: 0.2rem;
+  }
+
+  .current-clue {
+    border-radius: 1.15rem;
+    padding: 1.1rem;
+  }
+
+  .current-clue p {
+    font-size: 1.2rem;
+    line-height: 1.5;
+  }
+
+  .current-clue img {
+    max-height: 11rem;
+  }
+
+  .clue-answer-form {
+    padding: 0.85rem;
+    border-radius: 1rem;
+  }
+
+  .clue-guess-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+
+  .clue-guess-row input {
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+
+  .clue-guess-row button {
+    min-height: 3rem;
+    padding: 0.65rem 0.75rem;
+    white-space: nowrap;
+  }
+
+  .clue-answer-form > button {
+    min-height: 2.75rem;
   }
 
   .clue-map-hints__heading {
@@ -1257,6 +1631,12 @@ input:disabled {
 
   .state-map-label {
     font-size: 12px;
+  }
+}
+
+@media (max-width: 355px) {
+  .clue-guess-row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
